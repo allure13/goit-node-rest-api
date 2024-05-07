@@ -33,7 +33,7 @@ export const getOneContact = async (req, res, next) => {
         data: { contact },
       });
     } else {
-      throw HttpError(404, "Contact not found");
+      throw HttpError(404).message("Contact not found");
     }
   } catch (error) {
     next(error);
@@ -51,7 +51,7 @@ export const deleteContact = async (req, res, next) => {
         data: { deletedContact },
       });
     } else {
-      throw HttpError(404, "Contact not found");
+      throw HttpError(404).message("Contact not found");
     }
   } catch (error) {
     next(error);
@@ -84,7 +84,7 @@ export const updateContact = async (req, res, next) => {
         data: { updatedContact },
       });
     } else {
-      throw HttpError(404, "Contact not found");
+      throw HttpError(404).message("Contact not found");
     }
   } catch (error) {
     next(error);
