@@ -7,6 +7,7 @@ import {
   addContact,
   updContact,
 } from "../services/contactsServices.js";
+import { updateContactSchema } from "../schemas/contactsSchemas.js";
 
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -14,7 +15,6 @@ export const getAllContacts = async (req, res, next) => {
 
     res.json({
       status: "success",
-      code: 200,
       data: { contacts },
     });
   } catch (error) {
@@ -27,13 +27,9 @@ export const getOneContact = async (req, res, next) => {
     const { id } = req.params;
     const contact = await getContactById(id);
     if (contact) {
-      res.json({
-        status: "success",
-        code: 200,
-        data: { contact },
-      });
+      res.json(contact);
     } else {
-      throw HttpError(404).message("Contact not found");
+      throw HttpError(404, "Contact not found");
     }
   } catch (error) {
     next(error);
@@ -47,11 +43,10 @@ export const deleteContact = async (req, res, next) => {
     if (deletedContact) {
       res.json({
         status: "success",
-        code: 200,
         data: { deletedContact },
       });
     } else {
-      throw HttpError(404).message("Contact not found");
+      throw HttpError(404, "Contact not found");
     }
   } catch (error) {
     next(error);
@@ -75,16 +70,19 @@ export const createContact = async (req, res, next) => {
 export const updateContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updatedContact = await updContact(id, req.body);
+    const { name, email, phone } = req.body;
+
+    const { error } = updateContactSchema.validate(req.body);
+    if (error) {
+      throw new HttpError(400, error.message);
+    }
+
+    const updatedContact = await updContact(id, { name, email, phone });
     console.log(updatedContact);
     if (updatedContact) {
-      res.status(200).json({
-        status: "success",
-        code: 200,
-        data: { updatedContact },
-      });
+      res.json(updatedContact);
     } else {
-      throw HttpError(404).message("Contact not found");
+      throw HttpError(404, "Contact not found");
     }
   } catch (error) {
     next(error);
