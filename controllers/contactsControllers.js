@@ -1,4 +1,3 @@
-import e from "express";
 import HttpError from "../helpers/HttpError.js";
 import {
   listContacts,
@@ -68,12 +67,25 @@ export const updateContact = async (req, res, next) => {
     }
 
     const updatedContact = await updContact(id, { name, email, phone });
-    console.log(updatedContact);
+
     if (updatedContact) {
       res.json(updatedContact);
     } else {
       throw HttpError(404, "Contact not found");
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateFavoriteContact = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone } = req.body;
+    const updatedContact = await updContact(id, { name, email, phone });
+    if (!updatedContact) throw HttpError(404, "Contact not found");
+
+    res.json(updatedContact);
   } catch (error) {
     next(error);
   }
