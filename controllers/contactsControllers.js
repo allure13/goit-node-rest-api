@@ -6,7 +6,6 @@ import {
   addContact,
   updContact,
 } from "../services/contactsServices.js";
-import { updateContactSchema } from "../schemas/contactsSchemas.js";
 
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -60,11 +59,6 @@ export const updateContact = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, email, phone } = req.body;
-
-    const { error } = updateContactSchema.validate(req.body);
-    if (error) {
-      throw new HttpError(400, error.message);
-    }
 
     const updatedContact = await updContact(id, { name, email, phone });
 
