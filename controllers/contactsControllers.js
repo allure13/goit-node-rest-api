@@ -1,4 +1,3 @@
-import e from "express";
 import HttpError from "../helpers/HttpError.js";
 import {
   listContacts,
@@ -7,7 +6,6 @@ import {
   addContact,
   updContact,
 } from "../services/contactsServices.js";
-import { updateContactSchema } from "../schemas/contactsSchemas.js";
 
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -62,18 +60,26 @@ export const updateContact = async (req, res, next) => {
     const { id } = req.params;
     const { name, email, phone } = req.body;
 
-    const { error } = updateContactSchema.validate(req.body);
-    if (error) {
-      throw new HttpError(400, error.message);
-    }
-
     const updatedContact = await updContact(id, { name, email, phone });
-    console.log(updatedContact);
+
     if (updatedContact) {
       res.json(updatedContact);
     } else {
       throw HttpError(404, "Contact not found");
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateFavoriteContact = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone } = req.body;
+    const updatedContact = await updContact(id, { name, email, phone });
+    if (!updatedContact) throw HttpError(404, "Contact not found");
+
+    res.json(updatedContact);
   } catch (error) {
     next(error);
   }
