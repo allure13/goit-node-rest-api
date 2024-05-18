@@ -1,7 +1,7 @@
 import { Contact } from "../models/contactModels.js";
 
-const listContacts = async () => {
-  return Contact.find();
+const listContacts = async (owner) => {
+  return Contact.find({ owner });
 };
 
 const getContactById = async (contactId, owner) => {
