@@ -21,7 +21,7 @@ const uploadAvatarMiddleware = multer({storage});
 const optimazeAvatarMiddleware = async (req, res, next) => {
     try {
         const avatar = await Jimp.read(req.file.path);
-        avatar.resize(200, 200).quality(60).write(req.file.path);   
+        avatar.resize(250, 250).quality(60).write(req.file.path);   
     } catch (error) {
        next(error); 
     }
