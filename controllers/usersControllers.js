@@ -9,17 +9,25 @@ export const register = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    
+
     if (user !== null) {
       throw HttpError(409, "Email in use");
     }
 
     const avatar = gravatar.url(email, { protocol: "https", size: 200 });
     const hash = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ email, password: hash, avatarURL: avatar });
-    res
-      .status(201)
-      .json({ user: { email, subscription: newUser.subscription, avatarURL: newUser.avatarURL } });
+    const newUser = await User.create({
+      email,
+      password: hash,
+      avatarURL: avatar,
+    });
+    res.status(201).json({
+      user: {
+        email,
+        subscription: newUser.subscription,
+        avatarURL: newUser.avatarURL,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -66,14 +74,19 @@ export const current = async (req, res, next) => {
   res.json({ email, subscription });
 };
 
- export const uploadAvatar = async (req, res, next) => {
+export const updateAvatar = async (req, res, next) => {
   try {
-    await fs.rename(req.file.path, path.resolve("public/avatars", req.file.filename));
+    const fileName = req.file.filename;
+    await fs.rename(req.file.path, path.resolve("public/avatars", fileName));
 
-    const user = await User.findByIdAndUpdate(req.user._id, {avatarURL: req.file.filename}, { new: true },);
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatarURL: fileName },
+      { new: true }
+    );
 
     res.send(user);
   } catch (error) {
     next(error);
   }
- }
+};
