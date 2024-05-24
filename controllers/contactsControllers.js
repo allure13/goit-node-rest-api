@@ -9,7 +9,8 @@ import {
 
 export const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await listContacts();
+    const { _id: owner } = req.user;
+    const contacts = await listContacts(owner);
 
     res.json(contacts);
   } catch (error) {
@@ -20,7 +21,8 @@ export const getAllContacts = async (req, res, next) => {
 export const getOneContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const contact = await getContactById(id);
+    const { _id: owner } = req.user;
+    const contact = await getContactById(id, owner);
     if (contact) {
       res.json(contact);
     } else {
@@ -34,7 +36,8 @@ export const getOneContact = async (req, res, next) => {
 export const deleteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deletedContact = await removeContact(id);
+    const { _id: owner } = req.user;
+    const deletedContact = await removeContact(id, owner);
     if (deletedContact) {
       res.json(deletedContact);
     } else {
@@ -47,8 +50,7 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const { name, email, phone } = req.body;
-    const newContact = await addContact(name, email, phone);
+    const newContact = await addContact({ ...req.body, owner: req.user._id });
     res.status(201).json(newContact);
   } catch (error) {
     next(error);
@@ -58,9 +60,9 @@ export const createContact = async (req, res, next) => {
 export const updateContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, email, phone } = req.body;
+    const { _id: owner } = req.user;
 
-    const updatedContact = await updContact(id, { name, email, phone });
+    const updatedContact = await updContact(id, owner, req.body);
 
     if (updatedContact) {
       res.json(updatedContact);
@@ -75,8 +77,9 @@ export const updateContact = async (req, res, next) => {
 export const updateFavoriteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, email, phone } = req.body;
-    const updatedContact = await updContact(id, { name, email, phone });
+    const { _id: owner } = req.user;
+
+    const updatedContact = await updContact(id, owner, req.body);
     if (!updatedContact) throw HttpError(404, "Contact not found");
 
     res.json(updatedContact);
