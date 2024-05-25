@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import gravatar from "gravatar";
 import * as fs from "node:fs/promises";
 import path from "node:path";
+import HttpError from "../helpers/HttpError.js";
 
 export const register = async (req, res, next) => {
   try {
