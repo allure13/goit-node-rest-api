@@ -77,12 +77,18 @@ export const current = async (req, res, next) => {
 
 export const updateAvatar = async (req, res, next) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded. Try again." });
+    }
+
     const fileName = req.file.filename;
     await fs.rename(req.file.path, path.resolve("public/avatars", fileName));
 
+    const avatarURL = path.join("/avatars", fileName);
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { avatarURL: fileName },
+      { avatarURL: avatarURL },
       { new: true }
     );
 
