@@ -5,6 +5,8 @@ import gravatar from "gravatar";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import HttpError from "../helpers/HttpError.js";
+import mail from "../mail.js";
+import crypto from "node:crypto";
 
 export const register = async (req, res, next) => {
   try {
@@ -17,11 +19,23 @@ export const register = async (req, res, next) => {
 
     const avatar = gravatar.url(email, { protocol: "https", size: 200 });
     const hash = await bcrypt.hash(password, 10);
+    const verifyToken = crypto.randomUUID();
+
     const newUser = await User.create({
       email,
       password: hash,
       avatarURL: avatar,
+      verifyToken,
     });
+
+    mail.sendMail({
+      to: email,
+      from: "igor.cheplyaka@meta.ua",
+      subject: "Welcome to phonebook!",
+      html: `To confirm your email please click on the <a href="http://localhost:3000//users/verify/${verifyToken}">link</a>`,
+      text: `o confirm your email please open the link http://localhost:3000//users/verify/${verifyToken}`,
+    });
+
     res.status(201).json({
       user: {
         email,
