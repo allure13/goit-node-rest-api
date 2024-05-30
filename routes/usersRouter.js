@@ -7,6 +7,7 @@ import {
   logout,
   register,
   updateAvatar,
+  verify,
 } from "../controllers/usersControllers.js";
 import { auth } from "../middlewares/auth.js";
 import {
@@ -14,8 +15,11 @@ import {
   optimazeAvatarMiddleware,
 } from "../middlewares/upload.js";
 
+
 const usersRouter = express.Router();
 
+usersRouter.get("/verify/:verificationToken", verify)
+usersRouter.post("/verify", )
 usersRouter.post("/register", validateBody(usersSchema), register);
 usersRouter.post("/login", validateBody(usersSchema), login);
 usersRouter.post("/logout", auth, logout);

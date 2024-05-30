@@ -63,6 +63,10 @@ export const login = async (req, res, next) => {
       throw HttpError(401, "Email or password is wrong");
     }
 
+    if (user.verify === false) {
+      throw HttpError(401, "please verify your email")
+    }
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
@@ -111,3 +115,25 @@ export const updateAvatar = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const verify = async (req, res, next) => {
+  const {token} = req.params;
+
+try {
+  const user = await User.findOneAndUpdate(
+    { verifyToken: token },
+    { verify: true, verifyToken: null },
+    { new: true },
+  );
+  if (user === null) {
+    throw HttpError(404, "User not found!:(");
+  }
+
+  res.send({message: "Email confirm succesfully!:)"});
+
+} catch (error) {
+  next(error);
+}
+  
+}
