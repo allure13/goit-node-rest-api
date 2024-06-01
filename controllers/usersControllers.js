@@ -7,6 +7,22 @@ import path from "node:path";
 import HttpError from "../helpers/HttpError.js";
 import mail from "../mail.js";
 import crypto from "node:crypto";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const { EMAIL_FROM, BASE_URL } = process.env;
+
+const sendVerificationEmail = (email, token, subject) => {
+  const verificationLink = `${BASE_URL}/users/verify/${token}`;
+  return mail.sendMail({
+    to: email,
+    from: EMAIL_FROM,
+    subject,
+    html: `To confirm your email please click on the <a href="${verificationLink}">link</a>`,
+    text: `To confirm your email please open the link ${verificationLink}`,
+  });
+};
 
 export const register = async (req, res, next) => {
   try {
@@ -28,13 +44,11 @@ export const register = async (req, res, next) => {
       verificationToken,
     });
 
-    mail.sendMail({
-      to: email,
-      from: "igor.cheplyaka@meta.ua",
-      subject: "Welcome to phonebook!",
-      html: `To confirm your email please click on the <a href="http://localhost:3000/users/verify/${verificationToken}">link</a>`,
-      text: `o confirm your email please open the link http://localhost:3000/users/verify/${verificationToken}`,
-    });
+    await sendVerificationEmail(
+      email,
+      verificationToken,
+      "Welcome to phonebook!"
+    );
 
     res.status(201).json({
       user: {
@@ -155,13 +169,11 @@ export const resendVerificationEmail = async (req, res, next) => {
         .json({ message: "Verification has already been passed" });
     }
 
-    await mail.sendMail({
-      to: email,
-      from: "igor.cheplyaka@meta.ua",
-      subject: "Resend Verification Email",
-      html: `To confirm your email please click on the <a href="http://localhost:3000/users/verify/${user.verificationToken}">link</a>`,
-      text: `To confirm your email please open the link http://localhost:3000/users/verify/${user.verificationToken}`,
-    });
+    await sendVerificationEmail(
+      email,
+      user.verificationToken,
+      "Resend Verification Email"
+    );
 
     res.status(200).json({ message: "Verification email sent" });
   } catch (error) {
